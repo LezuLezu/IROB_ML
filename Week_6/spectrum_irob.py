@@ -43,7 +43,7 @@ class AudioStream(object):
             rate=self.RATE,
             input=True,
             output=True,
-            input_device_index=1,
+            input_device_index=2,
             frames_per_buffer=self.CHUNK,
         )
         self.init_plots()

@@ -178,7 +178,7 @@ if __name__=="__main__":
     pyaudio_format = pyaudio.paInt16 # 16-bit device
     buffer_format  = np.int16 # 16-bit for buffer
     chans          = 1 # only read 1 channel
-    dev_index      = 0 # index of sound device    
+    dev_index      = 2 # index of sound device    
     #
     #############################
     # stream info and data saver
