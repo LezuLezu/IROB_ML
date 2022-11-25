@@ -21,23 +21,23 @@ import sys
 import importlib.util
 
 # LED CODE
-import RPi.GPIO as GPIO
-GPIO.setmode(GPIO.BCM)
-# Define pins
-LED_RED = 26
-LED_GREEN = 19
-LED_YELLOW = 13
-LED_BLUE = 6
-# Set all leds to output
-GPIO.setup(LED_RED, GPIO.OUT)
-GPIO.setup(LED_GREEN, GPIO.OUT)
-GPIO.setup(LED_YELLOW, GPIO.OUT)
-GPIO.setup(LED_BLUE, GPIO.OUT)
-# turn all of
-GPIO.output(LED_RED, GPIO.LOW)
-GPIO.output(LED_GREEN, GPIO.LOW)
-GPIO.output(LED_YELLOW, GPIO.LOW)
-GPIO.output(LED_BLUE, GPIO.LOW)
+# import RPi.GPIO as GPIO
+# GPIO.setmode(GPIO.BCM)
+# # Define pins
+# LED_RED = 26
+# LED_GREEN = 19
+# LED_YELLOW = 13
+# LED_BLUE = 6
+# # Set all leds to output
+# GPIO.setup(LED_RED, GPIO.OUT)
+# GPIO.setup(LED_GREEN, GPIO.OUT)
+# GPIO.setup(LED_YELLOW, GPIO.OUT)
+# GPIO.setup(LED_BLUE, GPIO.OUT)
+# # turn all of
+# GPIO.output(LED_RED, GPIO.LOW)
+# GPIO.output(LED_GREEN, GPIO.LOW)
+# GPIO.output(LED_YELLOW, GPIO.LOW)
+# GPIO.output(LED_BLUE, GPIO.LOW)
 
 
 
@@ -137,16 +137,23 @@ if ('StatefulPartitionedCall' in outname): # This is a TF2 model
 else: # This is a TF1 model
     boxes_idx, classes_idx, scores_idx = 0, 1, 2
 
+# Initialize frame rate calculation
+frame_rate_calc = 1
+freq = cv2.getTickFrequency()
+
 # Open video file
 video = cv2.VideoCapture(VIDEO_PATH)
 imW = video.get(cv2.CAP_PROP_FRAME_WIDTH)
 imH = video.get(cv2.CAP_PROP_FRAME_HEIGHT)
 
 while(video.isOpened()):
-    GPIO.output(LED_RED, GPIO.LOW)
-    GPIO.output(LED_GREEN, GPIO.LOW)
-    GPIO.output(LED_YELLOW, GPIO.LOW)
-    GPIO.output(LED_BLUE, GPIO.LOW)
+    # GPIO.output(LED_RED, GPIO.LOW)
+    # GPIO.output(LED_GREEN, GPIO.LOW)
+    # GPIO.output(LED_YELLOW, GPIO.LOW)
+    # GPIO.output(LED_BLUE, GPIO.LOW)
+    
+    t1 = cv2.getTickCount()
+
 
     # Acquire frame and resize to expected shape [1xHxWx3]
     ret, frame = video.read()
@@ -185,16 +192,16 @@ while(video.isOpened()):
             object_name = labels[int(classes[i])] # Look up object name from "labels" array using class index
             if object_name == "dog" or object_name == "cat":
                 cv2.rectangle(frame, (xmin,ymin), (xmax,ymax), (255, 0, 0), 4) #blue
-                GPIO.output(LED_BLUE, GPIO.HIGH)
+                # GPIO.output(LED_BLUE, GPIO.HIGH)
             elif object_name == "backpack" or object_name == "suitcase":
                 cv2.rectangle(frame, (xmin,ymin), (xmax,ymax), (0, 0, 255), 4) # red
-                GPIO.output(LED_RED, GPIO.HIGH)
+                # GPIO.output(LED_RED, GPIO.HIGH)
             elif object_name == "keyboard" or object_name == "mouse":
                 cv2.rectangle(frame, (xmin,ymin), (xmax,ymax), (0, 255, 0), 4) # green
-                GPIO.output(LED_GREEN, GPIO.HIGH)
+                # GPIO.output(LED_GREEN, GPIO.HIGH)
             elif object_name == "teddy bear" or object_name == "potted plant":
                 cv2.rectangle(frame, (xmin,ymin), (xmax,ymax), (0, 255, 255), 4) # yellow
-                GPIO.output(LED_YELLOW, GPIO.HIGH)
+                # GPIO.output(LED_YELLOW, GPIO.HIGH)
             else:
                 cv2.rectangle(frame, (xmin,ymin), (xmax,ymax), (153, 102, 102), 4)
 
@@ -206,8 +213,17 @@ while(video.isOpened()):
             cv2.rectangle(frame, (xmin, label_ymin-labelSize[1]-10), (xmin+labelSize[0], label_ymin+baseLine-10), (255, 255, 255), cv2.FILLED) # Draw white box to put label text in
             cv2.putText(frame, label, (xmin, label_ymin-7), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2) # Draw label text
 
+
+        # Draw framerate in corner of frame
+    cv2.putText(frame,'FPS: {0:.2f}'.format(frame_rate_calc),(30,50),cv2.FONT_HERSHEY_SIMPLEX,1,(0,0,0),2,cv2.LINE_AA)
+
     # All the results have been drawn on the frame, so it's time to display it.
     cv2.imshow('Object detector', frame)
+
+        # Calculate framerate
+    t2 = cv2.getTickCount()
+    time1 = (t2-t1)/freq
+    frame_rate_calc= 1/time1
 
     # Press 'q' to quit
     if cv2.waitKey(1) == ord('q'):
